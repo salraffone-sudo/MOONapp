@@ -3,7 +3,7 @@ import Head from "next/head";
 import MoonGlyph from "../components/MoonGlyph";
 import MoonCalendar from "../components/MoonCalendar";
 import LocationPicker from "../components/LocationPicker";
-import { getMoonData, getPlanetData, getObserver } from "../lib/astro";
+import { getMoonData, getPlanetData, getSunData, getObserver } from "../lib/astro";
 import { getSkyEvents } from "../lib/events";
 import cometData from "../data/comets.json";
 
@@ -38,6 +38,7 @@ export default function Home() {
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const [moon, setMoon] = useState(null);
+  const [sun, setSun] = useState(null);
   const [planets, setPlanets] = useState([]);
   const [events, setEvents] = useState([]);
   const [iss, setIss] = useState({ passes: [] });
@@ -81,6 +82,7 @@ export default function Home() {
     if (!location) return;
     const observer = getObserver(location.lat, location.lon);
     setMoon(getMoonData(momentForCalc, observer));
+    setSun(getSunData(momentForCalc, observer));
     setPlanets(getPlanetData(momentForCalc, observer));
     setEvents(getSkyEvents(momentForCalc, observer, 60));
 
@@ -201,18 +203,32 @@ export default function Home() {
         <h1 className="moon-name">{moon.phaseName}</h1>
         <p className="moon-sub">{moon.illuminationPct}% illuminated</p>
 
-        <div className="moon-facts">
-          <div className="fact">
-            <span className="fact-value">{Math.round(moon.distanceKm).toLocaleString()} km</span>
-            <span className="fact-label">Distance</span>
+        <div className="moon-facts-stack">
+          <div className="facts-row facts-row-single">
+            <div className="fact">
+              <span className="fact-value">{Math.round(moon.distanceKm).toLocaleString()} km</span>
+              <span className="fact-label">Distance</span>
+            </div>
           </div>
-          <div className="fact">
-            <span className="fact-value">{fmtTime(moon.rise)}</span>
-            <span className="fact-label">Moonrise</span>
+          <div className="facts-row facts-row-pair">
+            <div className="fact">
+              <span className="fact-value">{fmtTime(sun?.set)}</span>
+              <span className="fact-label">Sunset</span>
+            </div>
+            <div className="fact">
+              <span className="fact-value">{fmtTime(sun?.rise)}</span>
+              <span className="fact-label">Sunrise</span>
+            </div>
           </div>
-          <div className="fact">
-            <span className="fact-value">{fmtTime(moon.set)}</span>
-            <span className="fact-label">Moonset</span>
+          <div className="facts-row facts-row-pair">
+            <div className="fact">
+              <span className="fact-value">{fmtTime(moon.rise)}</span>
+              <span className="fact-label">Moonrise</span>
+            </div>
+            <div className="fact">
+              <span className="fact-value">{fmtTime(moon.set)}</span>
+              <span className="fact-label">Moonset</span>
+            </div>
           </div>
         </div>
 

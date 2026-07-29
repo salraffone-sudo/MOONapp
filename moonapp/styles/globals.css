@@ -88,12 +88,18 @@ h3,
   letter-spacing: 0.02em;
 }
 
-.moon-facts {
+.moon-facts-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin: 8px 0 24px;
+}
+
+.facts-row {
   display: flex;
   gap: 28px;
-  flex-wrap: wrap;
   justify-content: center;
-  margin: 8px 0 24px;
 }
 
 .fact {
@@ -391,6 +397,9 @@ h3,
   padding: 24px;
   width: 100%;
   max-width: 360px;
+  max-height: 90vh;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .picker-title {
@@ -423,6 +432,7 @@ h3,
 .picker-input-small {
   width: auto;
   flex: 1;
+  min-width: 0;
 }
 
 .picker-manual-row {

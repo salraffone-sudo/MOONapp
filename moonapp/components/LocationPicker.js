@@ -94,10 +94,10 @@ export default function LocationPicker({ onLocationChange, onUseMyLocation, onCl
             value={manualLon}
             onChange={(e) => setManualLon(e.target.value)}
           />
-          <button className="btn-secondary" onClick={submitManual}>
-            Set
-          </button>
         </div>
+        <button className="btn-secondary" style={{ marginTop: 10 }} onClick={submitManual}>
+          Set location
+        </button>
 
         <button className="picker-close" onClick={onClose}>
           Cancel

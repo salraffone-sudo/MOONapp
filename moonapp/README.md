@@ -65,6 +65,24 @@ been the weak link). What's here instead: an always-current "Upcoming Sky
 Events" panel you'll see every time you open the app — closer to a standing
 almanac than an alert. Say the word if you'd rather have the real thing.
 
+## Home screen icon: a static crescent
+
+Rather than a snapshot of "today's" phase that goes stale the moment you add
+the shortcut, the icon is a fixed, bold crescent — recognizable at a glance
+and never wrong. It's generated once as real PNG files in `public/icons/`
+(16/32/180/192/512px), wired into `public/manifest.json` and
+`pages/_document.js`, which is what Android's "Add to Home Screen" and Chrome
+install actually read from.
+
+To change its shape (e.g. a thinner sliver, or waning instead of waxing),
+edit the constants at the top of `scripts/generate-icons.js` and run:
+```
+node scripts/generate-icons.js
+```
+This regenerates the PNGs locally — commit the updated files, no redeploy
+step beyond a normal push. `sharp` is a dev dependency for this script only;
+it's not needed at runtime since the icons are static.
+
 ## What's real-time vs. computed vs. curated
 
 | Data | Source | Update frequency |

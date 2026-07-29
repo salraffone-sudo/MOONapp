@@ -18,13 +18,14 @@ const FULL_MOON_NAMES = [
 
 const PHASE_NAMES = [
   { max: 1, name: "New Moon" },
-  { max: 49, name: "Waxing Crescent" },
-  { max: 51, name: "First Quarter" },
-  { max: 99, name: "Waxing Gibbous" },
-  { max: 101, name: "Full Moon" },
-  { max: 149, name: "Waning Gibbous" },
-  { max: 151, name: "Last Quarter" },
-  { max: 199.9, name: "Waning Crescent" },
+  { max: 89, name: "Waxing Crescent" },
+  { max: 91, name: "First Quarter" },
+  { max: 179, name: "Waxing Gibbous" },
+  { max: 181, name: "Full Moon" },
+  { max: 269, name: "Waning Gibbous" },
+  { max: 271, name: "Last Quarter" },
+  { max: 359, name: "Waning Crescent" },
+  { max: 360.1, name: "New Moon" },
 ];
 
 // Moon distance thresholds (km) — rough supermoon/micromoon convention
@@ -131,4 +132,19 @@ export function getPlanetData(date, observer) {
 
 export function getObserver(lat, lon) {
   return new Astronomy.Observer(lat, lon, 0);
+}
+
+export function getSunData(date, observer) {
+  let rise = null;
+  let set = null;
+  try {
+    rise = Astronomy.SearchRiseSet(Astronomy.Body.Sun, observer, 1, date, 2);
+  } catch (e) {}
+  try {
+    set = Astronomy.SearchRiseSet(Astronomy.Body.Sun, observer, -1, date, 2);
+  } catch (e) {}
+  return {
+    rise: rise ? rise.date : null,
+    set: set ? set.date : null,
+  };
 }
