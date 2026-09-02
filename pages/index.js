@@ -3,8 +3,10 @@ import Head from "next/head";
 import MoonGlyph from "../components/MoonGlyph";
 import MoonCalendar from "../components/MoonCalendar";
 import LocationPicker from "../components/LocationPicker";
+import PlanetGlyph from "../components/PlanetGlyph";
+import EclipseBadge from "../components/EclipseBadge";
 import { getMoonData, getPlanetData, getSunData, getObserver } from "../lib/astro";
-import { getSkyEvents } from "../lib/events";
+import { getSkyEvents, getEclipseAlerts } from "../lib/events";
 import cometData from "../data/comets.json";
 
 const COMPASS = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
@@ -41,6 +43,7 @@ export default function Home() {
   const [sun, setSun] = useState(null);
   const [planets, setPlanets] = useState([]);
   const [events, setEvents] = useState([]);
+  const [eclipseAlerts, setEclipseAlerts] = useState({ lunar: null, solar: null });
   const [iss, setIss] = useState({ passes: [] });
   const [neos, setNeos] = useState({ objects: [] });
 
@@ -84,7 +87,8 @@ export default function Home() {
     setMoon(getMoonData(momentForCalc, observer));
     setSun(getSunData(momentForCalc, observer));
     setPlanets(getPlanetData(momentForCalc, observer));
-    setEvents(getSkyEvents(momentForCalc, observer, 60));
+    setEvents(getSkyEvents(momentForCalc, observer, 365));
+    setEclipseAlerts(getEclipseAlerts(momentForCalc, observer, 7));
 
     fetch(`/api/iss?lat=${location.lat}&lon=${location.lon}`)
       .then((r) => r.json())
@@ -167,6 +171,10 @@ export default function Home() {
   }
 
   const k = moon.illuminationPct / 100;
+  const topVisiblePlanets = planets
+    .filter((p) => p.visibleNow)
+    .sort((a, b) => a.magnitude - b.magnitude)
+    .slice(0, 3);
 
   return (
     <div className="wrap">
@@ -199,7 +207,24 @@ export default function Home() {
       )}
 
       <section className="hero">
-        <MoonGlyph k={k} waxing={moon.isWaxing} size={220} />
+        <div className="hero-flanked-row">
+          <div className="hero-side hero-side-left">
+            {topVisiblePlanets.length > 0 && (
+              <div className="planet-stack">
+                {topVisiblePlanets.map((p) => (
+                  <PlanetGlyph key={p.name} name={p.name} baseSize={24} />
+                ))}
+              </div>
+            )}
+          </div>
+
+          <MoonGlyph k={k} waxing={moon.isWaxing} size={190} />
+
+          <div className="hero-side hero-side-right">
+            <EclipseBadge lunar={eclipseAlerts.lunar} solar={eclipseAlerts.solar} />
+          </div>
+        </div>
+
         <h1 className="moon-name">{moon.phaseName}</h1>
         <p className="moon-sub">{moon.illuminationPct}% illuminated</p>
 
@@ -260,7 +285,7 @@ export default function Home() {
       <section className="section">
         <div className="section-title">
           <span>Upcoming Sky Events</span>
-          <span>next 60 days + notable eclipses</span>
+          <span>next 12 months</span>
         </div>
         <div className="card">
           {events.length > 0 ? (
@@ -277,7 +302,7 @@ export default function Home() {
               </div>
             ))
           ) : (
-            <p className="empty">Nothing notable in the next 60 days.</p>
+            <p className="empty">Nothing notable in the next 12 months.</p>
           )}
         </div>
       </section>
