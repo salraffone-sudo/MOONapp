@@ -1,0 +1,20 @@
+{
+  "name": "moonapp",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "astronomy-engine": "^2.1.19",
+    "next": "14.2.35",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "sharp": "^0.35.3",
+    "png-to-ico": "^2.1.8"
+  }
+}
