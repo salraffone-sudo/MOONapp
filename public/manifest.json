@@ -1,6 +1,6 @@
 {
-  "name": "MOONapp",
-  "short_name": "MOONapp",
+  "name": "Night Sky Almanac",
+  "short_name": "Moon",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0d16",
