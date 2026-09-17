@@ -231,13 +231,13 @@ export default function Home() {
           </div>
 
           {moonImage?.imageUrl ? (
-            <img
-              src={moonImage.imageUrl}
-              alt={`The Moon as it actually appears — ${moon.phaseName}`}
-              className="hero-moon-photo"
-              width={190}
-              height={190}
-            />
+            <div className="hero-moon-photo-wrap" style={{ width: 190, height: 190 }}>
+              <img
+                src={moonImage.imageUrl}
+                alt={`The Moon as it actually appears — ${moon.phaseName}`}
+                className="hero-moon-photo"
+              />
+            </div>
           ) : (
             <MoonGlyph k={k} waxing={moon.isWaxing} size={190} />
           )}
