@@ -1,0 +1,30 @@
+{
+  "_note": "Coordinates use the current IAU standard (positive-east longitude). Landing sites use the Davies & Colvin (1987/2000) precise values, cross-referenced against NASA history office data.",
+  "landmarks": [
+    { "name": "Apollo 11", "type": "Landing Site", "lat": 0.674, "lon": 23.473, "note": "Tranquility Base — first crewed Moon landing, July 20, 1969." },
+    { "name": "Apollo 12", "type": "Landing Site", "lat": -3.012, "lon": -23.422, "note": "Second crewed landing, in the Ocean of Storms, November 1969." },
+    { "name": "Apollo 14", "type": "Landing Site", "lat": -3.645, "lon": -17.471, "note": "Fra Mauro highlands, February 1971." },
+    { "name": "Apollo 15", "type": "Landing Site", "lat": 26.132, "lon": 3.634, "note": "Hadley–Apennine — first mission with the Lunar Roving Vehicle." },
+    { "name": "Apollo 16", "type": "Landing Site", "lat": -8.973, "lon": 15.498, "note": "Descartes Highlands, April 1972." },
+    { "name": "Apollo 17", "type": "Landing Site", "lat": 20.191, "lon": 30.772, "note": "Taurus–Littrow — the last crewed Moon landing, December 1972." },
+
+    { "name": "Tycho", "type": "Crater", "lat": -43.31, "lon": -11.36, "note": "Young crater with the Moon's most spectacular ray system, radiating over a thousand kilometers." },
+    { "name": "Copernicus", "type": "Crater", "lat": 9.62, "lon": -20.08, "note": "Nicknamed the 'Monarch of the Moon' — one of the most photographed craters, with a sharply terraced rim." },
+    { "name": "Aristarchus", "type": "Crater", "lat": 23.7, "lon": -47.4, "note": "The brightest large feature on the Moon — visible even by earthshine." },
+    { "name": "Plato", "type": "Crater", "lat": 51.6, "lon": -9.3, "note": "A lava-flooded crater with a smooth, dark floor that stands out from its surroundings." },
+    { "name": "Kepler", "type": "Crater", "lat": 8.1, "lon": -38.0, "note": "A small, young crater with an extensive bright ray system." },
+    { "name": "Grimaldi", "type": "Crater", "lat": -5.2, "lon": -68.6, "note": "One of the darkest features on the Moon, near the western limb." },
+    { "name": "Aristoteles", "type": "Crater", "lat": 50.2, "lon": 17.4, "note": "A large crater on the southern edge of Mare Frigoris." },
+    { "name": "Aristillus", "type": "Crater", "lat": 33.9, "lon": 1.2, "note": "A prominent, sharply-defined crater in eastern Mare Imbrium." },
+
+    { "name": "Montes Apenninus", "type": "Mountain Range", "lat": 18.9, "lon": -3.7, "note": "The Moon's grandest mountain range — a remnant of the Imbrium impact, towering over the Apollo 15 site." },
+    { "name": "Rima Hadley", "type": "Rille", "lat": 25.0, "lon": 3.0, "note": "A sinuous canyon explored on foot and by rover during Apollo 15." },
+
+    { "name": "Mare Imbrium", "type": "Sea", "lat": 32.8, "lon": -15.6, "note": "The 'Sea of Rains' — the Moon's largest and most dominant nearside basin." },
+    { "name": "Mare Serenitatis", "type": "Sea", "lat": 28.0, "lon": 17.5, "note": "The 'Sea of Serenity,' bordered by the Apennine and Caucasus mountains." },
+    { "name": "Mare Crisium", "type": "Sea", "lat": 17.0, "lon": 59.1, "note": "The 'Sea of Crises' — a strikingly round, isolated dark patch near the eastern limb." },
+    { "name": "Mare Tranquillitatis", "type": "Sea", "lat": 8.5, "lon": 31.4, "note": "The 'Sea of Tranquility' — where Apollo 11 first landed." },
+    { "name": "Oceanus Procellarum", "type": "Sea", "lat": 18.4, "lon": -57.4, "note": "The 'Ocean of Storms' — the largest lunar mare, covering over 10% of the Moon's surface." },
+    { "name": "Sinus Iridum", "type": "Bay", "lat": 45.01, "lon": -31.67, "note": "The 'Bay of Rainbows' — a striking semicircular bay opening onto Mare Imbrium." }
+  ]
+}

@@ -1,13 +1,16 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import Head from "next/head";
 import MoonGlyph from "../components/MoonGlyph";
 import MoonCalendar from "../components/MoonCalendar";
 import LocationPicker from "../components/LocationPicker";
 import PlanetGlyph from "../components/PlanetGlyph";
 import EclipseBadge from "../components/EclipseBadge";
+import MoonExplore from "../components/MoonExplore";
 import { getMoonData, getPlanetData, getSunData, getObserver } from "../lib/astro";
 import { getSkyEvents, getEclipseAlerts } from "../lib/events";
+import { projectVisibleLandmarks } from "../lib/selenographic";
 import cometData from "../data/comets.json";
+import landmarkData from "../data/landmarks.json";
 
 const COMPASS = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
 
@@ -45,6 +48,8 @@ export default function Home() {
   const [events, setEvents] = useState([]);
   const [eclipseAlerts, setEclipseAlerts] = useState({ lunar: null, solar: null });
   const [moonImage, setMoonImage] = useState(null);
+  const [exploreOpen, setExploreOpen] = useState(false);
+  const lastTapRef = useRef(0);
   const [iss, setIss] = useState({ passes: [] });
   const [neos, setNeos] = useState({ objects: [] });
 
@@ -82,6 +87,39 @@ export default function Home() {
 
   const isLiveSnapshot = location?.isLive && isToday(referenceDate);
 
+  const visibleLandmarks = useMemo(() => {
+    if (!moonImage || moonImage.subearthLat == null || moonImage.posAngle == null) return [];
+    return projectVisibleLandmarks(
+      landmarkData.landmarks,
+      moonImage.subearthLat,
+      moonImage.subearthLon,
+      moonImage.posAngle,
+      moonImage.isSouthUp
+    );
+  }, [moonImage]);
+
+  function handleHeroTap() {
+    const now = Date.now();
+    if (now - lastTapRef.current < 320) {
+      setExploreOpen(true);
+    }
+    lastTapRef.current = now;
+  }
+
+  function handleHeroTouchStart(e) {
+    if (e.touches && e.touches.length === 2) {
+      setExploreOpen(true);
+    }
+  }
+
+  // Frames are published hourly — floor to the hour to match a real frame.
+  // Shared by both the hero photo fetch and the (lazily loaded) explore image.
+  const timeParam = useMemo(() => {
+    const hourFloor = new Date(momentForCalc);
+    hourFloor.setMinutes(0, 0, 0);
+    return hourFloor.toISOString().slice(0, 16);
+  }, [momentForCalc]);
+
   useEffect(() => {
     if (!location) return;
     const observer = getObserver(location.lat, location.lon);
@@ -101,17 +139,12 @@ export default function Home() {
       .then(setNeos)
       .catch(() => setNeos({ objects: [], error: "unavailable" }));
 
-    // Frames are published hourly — floor to the hour to match a real frame.
-    const hourFloor = new Date(momentForCalc);
-    hourFloor.setMinutes(0, 0, 0);
-    const timeParam = hourFloor.toISOString().slice(0, 16);
-
     setMoonImage(null); // clear stale photo immediately so a location/date change doesn't show the wrong one mid-fetch
     fetch(`/api/moon-image?time=${timeParam}&lat=${location.lat}`)
       .then((r) => r.json())
       .then((data) => setMoonImage(data.imageUrl ? data : null))
       .catch(() => setMoonImage(null));
-  }, [location, momentForCalc]);
+  }, [location, momentForCalc, timeParam]);
 
   function handleSelectDay(date) {
     setReferenceDate(date);
@@ -231,7 +264,12 @@ export default function Home() {
           </div>
 
           {moonImage?.imageUrl ? (
-            <div className="hero-moon-photo-wrap" style={{ width: 190, height: 190 }}>
+            <div
+              className="hero-moon-photo-wrap"
+              style={{ width: 190, height: 190 }}
+              onClick={handleHeroTap}
+              onTouchStart={handleHeroTouchStart}
+            >
               <img
                 src={moonImage.imageUrl}
                 alt={`The Moon as it actually appears — ${moon.phaseName}`}
@@ -249,6 +287,7 @@ export default function Home() {
 
         <h1 className="moon-name">{moon.phaseName}</h1>
         <p className="moon-sub">{moon.illuminationPct}% illuminated</p>
+        {moonImage?.imageUrl && <p className="explore-tip">Double-tap or pinch the Moon to explore</p>}
 
         <div className="moon-facts-stack">
           <div className="facts-row facts-row-single">
@@ -415,10 +454,20 @@ export default function Home() {
 
       <p className="footer-note">
         Moon and planet positions computed locally from your coordinates — no external service, always
-        current. Sky events (eclipses, oppositions, meteor showers) computed the same way, within a 60-day
-        window plus the next eclipse regardless of distance. ISS passes via Open Notify. Near-earth objects
-        via NASA NeoWs. Comet list is curated manually (last updated {cometData._updated}).
+        current. Sky events (eclipses, oppositions, meteor showers) computed the same way, within a
+        12-month window. ISS passes via Open Notify. Near-earth objects via NASA NeoWs. Comet list is
+        curated manually (last updated {cometData._updated}). Hero photo via NASA's Dial-A-Moon; the
+        explore view's landmark positions are computed from the same data.
       </p>
+
+      {exploreOpen && moonImage?.imageUrl && (
+        <MoonExplore
+          imageSrc={`/api/moon-explore-image?time=${timeParam}&lat=${location.lat}`}
+          fallbackSrc={moonImage.imageUrl}
+          landmarks={visibleLandmarks}
+          onClose={() => setExploreOpen(false)}
+        />
+      )}
 
       {pickerOpen && (
         <LocationPicker

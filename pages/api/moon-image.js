@@ -31,6 +31,8 @@ export default async function handler(req, res) {
       imageUrl: chosen?.url || null,
       subearthLat: data.subearth_lat,
       subearthLon: data.subearth_lon,
+      posAngle: data.posangle,
+      isSouthUp: isSouthern,
     });
   } catch (err) {
     res.status(200).json({ imageUrl: null, error: "moon imagery temporarily unavailable" });

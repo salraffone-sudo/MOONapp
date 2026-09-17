@@ -45,6 +45,41 @@ npm run dev
 Visit http://localhost:3000. Geolocation requires HTTPS in most browsers except
 on localhost, so local dev works fine without a cert.
 
+## Explore mode: zoom in on the real Moon
+
+Double-tap or pinch the hero photo to open a full-screen, pannable/zoomable
+view with tappable landmarks — 6 Apollo landing sites plus 16 iconic craters,
+mountains, and seas, positioned correctly for the Moon's *current* libration.
+
+- **Real projection math, not guesswork.** `lib/selenographic.js` implements
+  the standard sub-observer orthographic projection used in lunar cartography
+  — the same three inputs NASA's API already gives us (sub-Earth latitude/
+  longitude, position angle) determine exactly where a surface coordinate
+  lands on the visible disc, and correctly hides anything currently on the
+  far side. Verified against a real captured API response before trusting it:
+  Mare Crisium projects to the eastern limb and Grimaldi to the western limb,
+  matching their known real-world positions.
+- **A genuinely higher-res image**, not the same 730×730 hero photo scaled
+  up. `pages/api/moon-explore-image.js` fetches NASA's clean (unlabeled)
+  high-resolution frame — confirmed to exist at a specific URL pattern by
+  inspecting NASA's own file listings, not guessed — converts it from TIFF
+  (browsers can't render TIFF) via `sharp`, and center-crops it to match the
+  hero photo's framing. This is a deliberate choice over NASA's own annotated
+  version, which does exist but only labels craters near the terminator,
+  always shows Apollo sites, and isn't interactive or styled to match the app.
+- **Coordinates are cross-referenced**, not typed from memory — every
+  landmark in `data/landmarks.json` was checked against Wikipedia/USGS
+  sources before shipping.
+
+**Not yet verified on a real device.** The pan/zoom/double-tap/pinch gesture
+code in `components/MoonExplore.js` compiles clean and follows a standard
+Pointer Events pattern, but there's no browser automation available to
+actually exercise touch gestures before deployment. Test double-tap and
+pinch on a real phone first — if either doesn't fire reliably, the timing
+threshold (`320`ms in `handleHeroTap`, in `pages/index.js`) or pinch-scale
+sensitivity (`MIN_SCALE`/`MAX_SCALE` in `MoonExplore.js`) are the first
+places to adjust.
+
 ## Revisions: events window, planet visual, eclipse alert
 
 - **Events list now spans 12 months uniformly.** Previously the header said
