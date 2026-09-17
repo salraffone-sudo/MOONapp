@@ -48,6 +48,7 @@ export default function Home() {
   const [events, setEvents] = useState([]);
   const [eclipseAlerts, setEclipseAlerts] = useState({ lunar: null, solar: null });
   const [moonImage, setMoonImage] = useState(null);
+  const [photoLoaded, setPhotoLoaded] = useState(false);
   const [exploreOpen, setExploreOpen] = useState(false);
   const lastTapRef = useRef(0);
   const [iss, setIss] = useState({ passes: [] });
@@ -140,6 +141,7 @@ export default function Home() {
       .catch(() => setNeos({ objects: [], error: "unavailable" }));
 
     setMoonImage(null); // clear stale photo immediately so a location/date change doesn't show the wrong one mid-fetch
+    setPhotoLoaded(false);
     fetch(`/api/moon-image?time=${timeParam}&lat=${location.lat}`)
       .then((r) => r.json())
       .then((data) => setMoonImage(data.imageUrl ? data : null))
@@ -263,22 +265,24 @@ export default function Home() {
             )}
           </div>
 
-          {moonImage?.imageUrl ? (
-            <div
-              className="hero-moon-photo-wrap"
-              style={{ width: 190, height: 190 }}
-              onClick={handleHeroTap}
-              onTouchStart={handleHeroTouchStart}
-            >
-              <img
-                src={moonImage.imageUrl}
-                alt={`The Moon as it actually appears — ${moon.phaseName}`}
-                className="hero-moon-photo"
-              />
-            </div>
-          ) : (
+          <div
+            className="hero-moon-stage"
+            style={{ width: 190, height: 190 }}
+            onClick={moonImage?.imageUrl ? handleHeroTap : undefined}
+            onTouchStart={moonImage?.imageUrl ? handleHeroTouchStart : undefined}
+          >
             <MoonGlyph k={k} waxing={moon.isWaxing} size={190} />
-          )}
+            {moonImage?.imageUrl && (
+              <div className={`hero-moon-photo-wrap ${photoLoaded ? "photo-loaded" : ""}`}>
+                <img
+                  src={moonImage.imageUrl}
+                  alt={`The Moon as it actually appears — ${moon.phaseName}`}
+                  className="hero-moon-photo"
+                  onLoad={() => setPhotoLoaded(true)}
+                />
+              </div>
+            )}
+          </div>
 
           <div className="hero-side hero-side-right">
             <EclipseBadge lunar={eclipseAlerts.lunar} solar={eclipseAlerts.solar} />

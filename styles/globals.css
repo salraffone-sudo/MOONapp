@@ -75,13 +75,25 @@ h3,
   filter: drop-shadow(0 0 40px rgba(201, 161, 92, 0.25));
 }
 
+.hero-moon-stage {
+  position: relative;
+}
+
 .hero-moon-photo-wrap {
+  position: absolute;
+  inset: 0;
   border-radius: 50%;
   overflow: hidden;
   filter: drop-shadow(0 0 40px rgba(201, 161, 92, 0.25));
   background: #0a0d16;
   cursor: zoom-in;
   touch-action: manipulation;
+  opacity: 0;
+  transition: opacity 0.7s ease;
+}
+
+.hero-moon-photo-wrap.photo-loaded {
+  opacity: 1;
 }
 
 .hero-moon-photo {
@@ -179,7 +191,7 @@ h3,
 
 .explore-popover {
   position: absolute;
-  bottom: 64px;
+  bottom: 84px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 33;
@@ -221,14 +233,28 @@ h3,
   cursor: pointer;
 }
 
-.explore-hint {
+.explore-footer {
   position: absolute;
   bottom: 18px;
   left: 50%;
   transform: translateX(-50%);
+  text-align: center;
+  z-index: 31;
+}
+
+.explore-mode-label {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0 0 4px;
+}
+
+.explore-hint {
   font-size: 11px;
   color: var(--silver-dim);
   white-space: nowrap;
+  margin: 0;
 }
 
 .hero-flanked-row {

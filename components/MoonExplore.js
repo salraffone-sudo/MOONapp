@@ -29,6 +29,7 @@ export default function MoonExplore({ imageSrc, fallbackSrc, landmarks, onClose 
   }
 
   function handlePointerDown(e) {
+    if (e.target.closest(".explore-dot")) return; // let the dot handle its own click uninterrupted
     e.currentTarget.setPointerCapture?.(e.pointerId);
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (pointers.current.size === 1) {
@@ -137,7 +138,10 @@ export default function MoonExplore({ imageSrc, fallbackSrc, landmarks, onClose 
         </div>
       )}
 
-      <p className="explore-hint">Pinch or scroll to zoom · drag to pan · tap a dot for details</p>
+      <div className="explore-footer">
+        <p className="explore-mode-label">Explore Mode — BETA</p>
+        <p className="explore-hint">Pinch or scroll to zoom · drag to pan · tap a dot for details</p>
+      </div>
     </div>
   );
 }
