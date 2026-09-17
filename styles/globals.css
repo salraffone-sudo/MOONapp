@@ -75,6 +75,13 @@ h3,
   filter: drop-shadow(0 0 40px rgba(201, 161, 92, 0.25));
 }
 
+.hero-moon-photo {
+  border-radius: 50%;
+  object-fit: cover;
+  filter: drop-shadow(0 0 40px rgba(201, 161, 92, 0.25));
+  background: #0a0d16;
+}
+
 .hero-flanked-row {
   display: flex;
   align-items: center;

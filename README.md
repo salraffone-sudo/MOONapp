@@ -66,6 +66,28 @@ on localhost, so local dev works fine without a cert.
   corona/diamond-ring glyph — visually distinct so you don't have to read the
   label to tell which. Silent the rest of the time, which will be most days.
 
+## Hero photo: real NASA lunar imagery
+
+The hero moon is now a real photorealistic image when available — NASA's
+Scientific Visualization Studio "Dial-A-Moon" API (`svs.gsfc.nasa.gov/api/dialamoon`)
+publishes an accurate rendered frame for every hour of the year, matching the
+Moon's actual phase, libration, and orientation. `pages/api/moon-image.js`
+proxies this (no API key needed) so the browser never talks to NASA directly.
+
+- **Hero only, by design.** The calendar's small day-glyphs still use the
+  synthetic SVG — fetching a real photo per calendar cell would be slow and
+  wasteful, and photorealism adds little at 26px.
+- **Hemisphere-aware.** The API returns both a north-up and a south-up image;
+  the Moon's orientation genuinely flips depending on which hemisphere you're
+  observing from, so the proxy picks the correct one from your latitude —
+  this stays correct if you use the location override for a Southern
+  Hemisphere city.
+- **Graceful fallback.** This is a real NASA tool exposed publicly, not a
+  versioned product API with an uptime guarantee. If a request ever fails
+  (network hiccup, a date outside the currently-published year, unexpected
+  downtime), the hero silently falls back to the synthetic glyph — nothing
+  breaks, you just lose the photo for that one view.
+
 ## New: calendar, sky events, location/date override
 
 - **Moon Calendar** — a month grid with a small accurate phase glyph per day.

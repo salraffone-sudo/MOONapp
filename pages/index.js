@@ -44,6 +44,7 @@ export default function Home() {
   const [planets, setPlanets] = useState([]);
   const [events, setEvents] = useState([]);
   const [eclipseAlerts, setEclipseAlerts] = useState({ lunar: null, solar: null });
+  const [moonImage, setMoonImage] = useState(null);
   const [iss, setIss] = useState({ passes: [] });
   const [neos, setNeos] = useState({ objects: [] });
 
@@ -99,6 +100,17 @@ export default function Home() {
       .then((r) => r.json())
       .then(setNeos)
       .catch(() => setNeos({ objects: [], error: "unavailable" }));
+
+    // Frames are published hourly — floor to the hour to match a real frame.
+    const hourFloor = new Date(momentForCalc);
+    hourFloor.setMinutes(0, 0, 0);
+    const timeParam = hourFloor.toISOString().slice(0, 16);
+
+    setMoonImage(null); // clear stale photo immediately so a location/date change doesn't show the wrong one mid-fetch
+    fetch(`/api/moon-image?time=${timeParam}&lat=${location.lat}`)
+      .then((r) => r.json())
+      .then((data) => setMoonImage(data.imageUrl ? data : null))
+      .catch(() => setMoonImage(null));
   }, [location, momentForCalc]);
 
   function handleSelectDay(date) {
@@ -218,7 +230,17 @@ export default function Home() {
             )}
           </div>
 
-          <MoonGlyph k={k} waxing={moon.isWaxing} size={190} />
+          {moonImage?.imageUrl ? (
+            <img
+              src={moonImage.imageUrl}
+              alt={`The Moon as it actually appears — ${moon.phaseName}`}
+              className="hero-moon-photo"
+              width={190}
+              height={190}
+            />
+          ) : (
+            <MoonGlyph k={k} waxing={moon.isWaxing} size={190} />
+          )}
 
           <div className="hero-side hero-side-right">
             <EclipseBadge lunar={eclipseAlerts.lunar} solar={eclipseAlerts.solar} />
