@@ -416,7 +416,7 @@ export default function Home() {
       <section className="section">
         <div className="section-title">
           <span>ISS Passes</span>
-          <span>next 5</span>
+          <span>{iss.passes && iss.passes.length > 0 ? \`next ${iss.passes.length}\` : "visible passes"}</span>
         </div>
         <div className="card">
           {iss.passes && iss.passes.length > 0 ? (
@@ -430,7 +430,7 @@ export default function Home() {
               </div>
             ))
           ) : (
-            <p className="empty">{iss.error || "No passes in range right now."}</p>
+            <p className="empty">{iss.error || "No visible passes in the next 30 days."}</p>
           )}
         </div>
       </section>

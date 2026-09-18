@@ -62,23 +62,11 @@ function isObserverDark(observer, date) {
   return sunHor.altitude < -6; // civil twilight or darker — sky dark enough to spot it
 }
 
-// Walk forward in time, find every geometric pass (elevation crosses above
-// then back below minElevationDeg), then keep only the ones a person could
-// actually see: dark sky at the observer's location + station lit by the sun.
-function findVisibleIssPasses(satrec, lat, lon, opts = {}) {
-  const { days = 10, stepSeconds = 15, minElevationDeg = 10, maxPasses = 5 } = opts;
-  const observerGd = {
-    latitude: satellite.degreesToRadians(lat),
-    longitude: satellite.degreesToRadians(lon),
-    height: 0,
-  };
-  const observer = new Astronomy.Observer(lat, lon, 0);
-
-  const startMs = Date.now();
-  const endMs = startMs + days * 86400 * 1000;
+// Scans one time window [startMs, endMs) for geometric passes (elevation
+// crosses above then back below minElevationDeg).
+function scanGeometricPasses(satrec, observerGd, startMs, endMs, stepSeconds, minElevationDeg) {
   const stepMs = stepSeconds * 1000;
-
-  const geometricPasses = [];
+  const passes = [];
   let inPass = false;
   let riseTime = null;
   let maxElevDeg = -90;
@@ -100,29 +88,62 @@ function findVisibleIssPasses(satrec, lat, lon, opts = {}) {
     } else if (inPass) {
       maxElevDeg = Math.max(maxElevDeg, elevDeg);
       if (elevDeg < minElevationDeg) {
-        geometricPasses.push({ riseTime, setTime: date, maxElevDeg });
+        passes.push({ riseTime, setTime: date, maxElevDeg });
         inPass = false;
-        if (geometricPasses.length >= maxPasses * 6) break; // plenty of candidates to filter down
       }
     }
   }
+  return passes;
+}
+
+// Walk forward in time, find every geometric pass, then keep only the ones a
+// person could actually see: dark sky at the observer's location + station
+// lit by the sun. A "visible" pass — dark sky *and* sunlit station — is
+// rarer than a merely geometric one, and how rare varies with season and
+// latitude, so a fixed short window won't reliably turn up 5 of them.
+// Scans in growing chunks (10 → 20 → 30 days) and stops as soon as it has
+// enough, so the common case stays fast and only the rare thin stretch pays
+// for the wider scan. Returns however many it found — never invents extra
+// passes to hit the target.
+function findVisibleIssPasses(satrec, lat, lon, opts = {}) {
+  const { stepSeconds = 15, minElevationDeg = 10, maxPasses = 5, maxDays = 30, chunkDays = 10 } = opts;
+  const observerGd = {
+    latitude: satellite.degreesToRadians(lat),
+    longitude: satellite.degreesToRadians(lon),
+    height: 0,
+  };
+  const observer = new Astronomy.Observer(lat, lon, 0);
 
   const visible = [];
-  for (const pass of geometricPasses) {
-    const midTime = new Date((pass.riseTime.getTime() + pass.setTime.getTime()) / 2);
-    const midPosVel = satellite.propagate(satrec, midTime);
-    if (!midPosVel || !midPosVel.position) continue;
+  let windowStartMs = Date.now();
+  let daysScanned = 0;
 
-    if (isObserverDark(observer, midTime) && isIlluminated(midPosVel.position, midTime)) {
-      visible.push({
-        riseTime: pass.riseTime.toISOString(),
-        setTime: pass.setTime.toISOString(),
-        durationSeconds: Math.round((pass.setTime - pass.riseTime) / 1000),
-        maxElevationDeg: Math.round(pass.maxElevDeg),
-      });
-      if (visible.length >= maxPasses) break;
+  while (visible.length < maxPasses && daysScanned < maxDays) {
+    const thisChunkDays = Math.min(chunkDays, maxDays - daysScanned);
+    const windowEndMs = windowStartMs + thisChunkDays * 86400 * 1000;
+
+    const geometricPasses = scanGeometricPasses(satrec, observerGd, windowStartMs, windowEndMs, stepSeconds, minElevationDeg);
+
+    for (const pass of geometricPasses) {
+      const midTime = new Date((pass.riseTime.getTime() + pass.setTime.getTime()) / 2);
+      const midPosVel = satellite.propagate(satrec, midTime);
+      if (!midPosVel || !midPosVel.position) continue;
+
+      if (isObserverDark(observer, midTime) && isIlluminated(midPosVel.position, midTime)) {
+        visible.push({
+          riseTime: pass.riseTime.toISOString(),
+          setTime: pass.setTime.toISOString(),
+          durationSeconds: Math.round((pass.setTime - pass.riseTime) / 1000),
+          maxElevationDeg: Math.round(pass.maxElevDeg),
+        });
+        if (visible.length >= maxPasses) break;
+      }
     }
+
+    windowStartMs = windowEndMs;
+    daysScanned += thisChunkDays;
   }
+
   return visible;
 }
 
