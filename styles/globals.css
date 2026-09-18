@@ -45,7 +45,17 @@ h3,
 .wrap {
   max-width: 760px;
   margin: 0 auto;
-  padding: 48px 24px 96px;
+  padding: max(48px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) 96px
+    max(24px, env(safe-area-inset-left));
+}
+
+/* Reclaim a little side room on the narrowest phones (e.g. iPhone SE-class,
+   ~320-375px wide) rather than the fixed 24px gutter used everywhere else. */
+@media (max-width: 380px) {
+  .wrap {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
 }
 
 .eyebrow {
@@ -60,6 +70,79 @@ h3,
   font-size: 13px;
   color: var(--silver-dim);
   margin: 0 0 40px;
+}
+
+/* --- Home screen (header + hero) ---
+   Fills the visible viewport on first load so the hero gets real room to
+   breathe and the calendar sits one deliberate scroll away, instead of its
+   top edge peeking up under a cramped hero. `dvh`/`svh` (with a `vh`
+   fallback for older browsers) track the *actual* visible area on mobile,
+   where the address bar/toolbar can show or hide and change how tall "100vh"
+   really is — without them this would either clip under browser chrome or
+   leave a dead gap once the chrome collapses. On a short viewport (mobile
+   landscape, a shallow desktop window) content that doesn't fit simply
+   flows past `min-height` and the page scrolls a little sooner — nothing
+   is ever cut off. */
+.home-screen {
+  min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-screen .header-row {
+  flex: 0 0 auto;
+}
+
+.hero-center {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0; /* let flex children shrink instead of forcing overflow */
+}
+
+.hero-footer {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0 28px;
+  text-align: center;
+}
+
+.scroll-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--silver-dim);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.scroll-hint-arrow {
+  font-size: 16px;
+  line-height: 1;
+  color: var(--gold);
+}
+
+@keyframes hint-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(4px);
+  }
 }
 
 /* --- Hero moon --- */
@@ -501,6 +584,7 @@ h3,
 /* --- Header controls --- */
 .header-row {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: flex-start;
   gap: 12px;
@@ -527,6 +611,8 @@ h3,
 
 .preview-banner {
   display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   justify-content: space-between;
   align-items: center;
   background: rgba(139, 126, 196, 0.1);
@@ -737,6 +823,9 @@ h3,
 @media (prefers-reduced-motion: no-preference) {
   .hero {
     animation: rise 0.6s ease-out;
+  }
+  .scroll-hint-arrow {
+    animation: hint-bob 2.2s ease-in-out infinite;
   }
 }
 

@@ -53,6 +53,11 @@ export default function Home() {
   const lastTapRef = useRef(0);
   const [iss, setIss] = useState({ passes: [] });
   const [neos, setNeos] = useState({ objects: [] });
+  const calendarRef = useRef(null);
+
+  function scrollToCalendar() {
+    calendarRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   function requestGeolocation() {
     if (!navigator.geolocation) {
@@ -229,111 +234,123 @@ export default function Home() {
         <title>MOONapp</title>
       </Head>
 
-      <div className="header-row">
-        <div>
-          <p className="eyebrow">Tonight's Sky</p>
-          <p className="location-line" style={{ marginBottom: 0 }}>
-            {fmtDate(referenceDate, { weekday: "long", month: "long", day: "numeric" })} · {location.label} (
-            {location.lat.toFixed(2)}°, {location.lon.toFixed(2)}°)
-          </p>
-        </div>
-        <button className="link-btn" onClick={() => setPickerOpen(true)}>
-          Change location
-        </button>
-      </div>
-
-      {!isLiveSnapshot && (
-        <div className="preview-banner">
-          <span>
-            Previewing {fmtDate(referenceDate, { month: "short", day: "numeric" })} at 9:00 PM local — not live
-          </span>
-          <button className="link-btn" onClick={resetToLive}>
-            Back to now
+      <div className="home-screen">
+        <div className="header-row">
+          <div>
+            <p className="eyebrow">Tonight's Sky</p>
+            <p className="location-line" style={{ marginBottom: 0 }}>
+              {fmtDate(referenceDate, { weekday: "long", month: "long", day: "numeric" })} · {location.label} (
+              {location.lat.toFixed(2)}°, {location.lon.toFixed(2)}°)
+            </p>
+          </div>
+          <button className="link-btn" onClick={() => setPickerOpen(true)}>
+            Change location
           </button>
         </div>
-      )}
 
-      <section className="hero">
-        <div className="hero-flanked-row">
-          <div className="hero-side hero-side-left">
-            {topVisiblePlanets.length > 0 && (
-              <div className="planet-stack">
-                {topVisiblePlanets.map((p) => (
-                  <PlanetGlyph key={p.name} name={p.name} baseSize={24} />
-                ))}
-              </div>
-            )}
+        {!isLiveSnapshot && (
+          <div className="preview-banner">
+            <span>
+              Previewing {fmtDate(referenceDate, { month: "short", day: "numeric" })} at 9:00 PM local — not live
+            </span>
+            <button className="link-btn" onClick={resetToLive}>
+              Back to now
+            </button>
           </div>
-
-          <div
-            className="hero-moon-stage"
-            style={{ width: 190, height: 190 }}
-            onClick={moonImage?.imageUrl ? handleHeroTap : undefined}
-            onTouchStart={moonImage?.imageUrl ? handleHeroTouchStart : undefined}
-          >
-            <MoonGlyph k={k} waxing={moon.isWaxing} size={190} />
-            {moonImage?.imageUrl && (
-              <div className={`hero-moon-photo-wrap ${photoLoaded ? "photo-loaded" : ""}`}>
-                <img
-                  src={moonImage.imageUrl}
-                  alt={`The Moon as it actually appears — ${moon.phaseName}`}
-                  className="hero-moon-photo"
-                  onLoad={() => setPhotoLoaded(true)}
-                />
-              </div>
-            )}
-          </div>
-
-          <div className="hero-side hero-side-right">
-            <EclipseBadge lunar={eclipseAlerts.lunar} solar={eclipseAlerts.solar} />
-          </div>
-        </div>
-
-        <h1 className="moon-name">{moon.phaseName}</h1>
-        <p className="moon-sub">{moon.illuminationPct}% illuminated</p>
-        {moonImage?.imageUrl && <p className="explore-tip">Double-tap or pinch the Moon to explore</p>}
-
-        <div className="moon-facts-stack">
-          <div className="facts-row facts-row-single">
-            <div className="fact">
-              <span className="fact-value">{Math.round(moon.distanceKm).toLocaleString()} km</span>
-              <span className="fact-label">Distance</span>
-            </div>
-          </div>
-          <div className="facts-row facts-row-pair">
-            <div className="fact">
-              <span className="fact-value">{fmtTime(sun?.set)}</span>
-              <span className="fact-label">Sunset</span>
-            </div>
-            <div className="fact">
-              <span className="fact-value">{fmtTime(sun?.rise)}</span>
-              <span className="fact-label">Sunrise</span>
-            </div>
-          </div>
-          <div className="facts-row facts-row-pair">
-            <div className="fact">
-              <span className="fact-value">{fmtTime(moon.rise)}</span>
-              <span className="fact-label">Moonrise</span>
-            </div>
-            <div className="fact">
-              <span className="fact-value">{fmtTime(moon.set)}</span>
-              <span className="fact-label">Moonset</span>
-            </div>
-          </div>
-        </div>
-
-        {moon.isSupermoon && <span className="badge">Supermoon — near perigee</span>}
-        {moon.isMicromoon && <span className="badge">Micromoon — near apogee</span>}
-
-        {moon.traditionalName && (
-          <p className="moon-note">
-            Next full moon ({fmtDate(moon.nextFullDate)}) is the <strong>{moon.traditionalName}</strong> —{" "}
-            {moon.traditionalNote}
-          </p>
         )}
-      </section>
 
-      <section className="section">
+        <div className="hero-center">
+          <section className="hero">
+            <div className="hero-flanked-row">
+              <div className="hero-side hero-side-left">
+                {topVisiblePlanets.length > 0 && (
+                  <div className="planet-stack">
+                    {topVisiblePlanets.map((p) => (
+                      <PlanetGlyph key={p.name} name={p.name} baseSize={24} />
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div
+                className="hero-moon-stage"
+                style={{ width: 190, height: 190 }}
+                onClick={moonImage?.imageUrl ? handleHeroTap : undefined}
+                onTouchStart={moonImage?.imageUrl ? handleHeroTouchStart : undefined}
+              >
+                <MoonGlyph k={k} waxing={moon.isWaxing} size={190} />
+                {moonImage?.imageUrl && (
+                  <div className={`hero-moon-photo-wrap ${photoLoaded ? "photo-loaded" : ""}`}>
+                    <img
+                      src={moonImage.imageUrl}
+                      alt={`The Moon as it actually appears — ${moon.phaseName}`}
+                      className="hero-moon-photo"
+                      onLoad={() => setPhotoLoaded(true)}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="hero-side hero-side-right">
+                <EclipseBadge lunar={eclipseAlerts.lunar} solar={eclipseAlerts.solar} />
+              </div>
+            </div>
+
+            <h1 className="moon-name">{moon.phaseName}</h1>
+            <p className="moon-sub">{moon.illuminationPct}% illuminated</p>
+            {moonImage?.imageUrl && <p className="explore-tip">Double-tap or pinch the Moon to explore</p>}
+
+            <div className="moon-facts-stack">
+              <div className="facts-row facts-row-single">
+                <div className="fact">
+                  <span className="fact-value">{Math.round(moon.distanceKm).toLocaleString()} km</span>
+                  <span className="fact-label">Distance</span>
+                </div>
+              </div>
+              <div className="facts-row facts-row-pair">
+                <div className="fact">
+                  <span className="fact-value">{fmtTime(sun?.set)}</span>
+                  <span className="fact-label">Sunset</span>
+                </div>
+                <div className="fact">
+                  <span className="fact-value">{fmtTime(sun?.rise)}</span>
+                  <span className="fact-label">Sunrise</span>
+                </div>
+              </div>
+              <div className="facts-row facts-row-pair">
+                <div className="fact">
+                  <span className="fact-value">{fmtTime(moon.rise)}</span>
+                  <span className="fact-label">Moonrise</span>
+                </div>
+                <div className="fact">
+                  <span className="fact-value">{fmtTime(moon.set)}</span>
+                  <span className="fact-label">Moonset</span>
+                </div>
+              </div>
+            </div>
+
+            {moon.isSupermoon && <span className="badge">Supermoon — near perigee</span>}
+            {moon.isMicromoon && <span className="badge">Micromoon — near apogee</span>}
+          </section>
+        </div>
+
+        <div className="hero-footer">
+          {moon.traditionalName && (
+            <p className="moon-note">
+              Next full moon ({fmtDate(moon.nextFullDate)}) is the <strong>{moon.traditionalName}</strong> —{" "}
+              {moon.traditionalNote}
+            </p>
+          )}
+          <button className="scroll-hint" onClick={scrollToCalendar}>
+            <span>Moon Calendar</span>
+            <span className="scroll-hint-arrow" aria-hidden="true">
+              ↓
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <section className="section" ref={calendarRef}>
         <div className="section-title">
           <span>Moon Calendar</span>
           <span>tap a day to preview</span>
@@ -407,7 +424,8 @@ export default function Home() {
               <div className="row" key={i}>
                 <span className="name-col">{fmtDate(p.riseTime)}</span>
                 <span className="meta-col">
-                  {fmtTime(p.riseTime)} · visible {Math.round(p.durationSeconds / 60)} min
+                  {fmtTime(p.riseTime)} · visible {Math.round(p.durationSeconds / 60)} min · up to{" "}
+                  {p.maxElevationDeg}° high
                 </span>
               </div>
             ))
